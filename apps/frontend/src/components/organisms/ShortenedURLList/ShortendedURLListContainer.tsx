@@ -6,16 +6,19 @@ import { ErrorMessage } from '../../atoms/ErrorMessage/ErrorMessage';
 import { Spinner } from '../../atoms/Spinner/Spinner';
 import { UrlService } from '../../../services/modules';
 
-export const ShortenedURLListContainer: React.FC = () => {
+interface Props {
+  reloadKey: number;
+}
 
+export const ShortenedURLListContainer: React.FC<Props> = ({ reloadKey }) => {
   const apiUrl = process.env.REACT_APP_API_URL;
   const urlService: UrlService = new UrlService(apiUrl || 'http://localhost:3000/api');
-  const { urls, loading, error } = useUrlList(urlService);
+  const { urls, loading, error } = useUrlList(urlService, reloadKey); // 👈 se pasa reloadKey
 
   if (loading) {
     return (
       <div className="text-center py-12">
-        <Spinner size='md'/>
+        <Spinner size="md" />
       </div>
     );
   }
@@ -28,5 +31,5 @@ export const ShortenedURLListContainer: React.FC = () => {
     );
   }
 
-  return <ShortenedURLList urls={urls || []} />;
+  return <ShortenedURLList urls={urls?.urls || []} />;
 };

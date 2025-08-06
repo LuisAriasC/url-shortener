@@ -1,17 +1,15 @@
-// apps/frontend/src/hooks/useUrlApi.ts
-
 import { useState, useEffect, useRef } from 'react';
-import { Url } from '@url-shortener/types';
+import { GetUrlResponse, ListAllResponse, ShortenInput, ShortenResponse, Url } from '@url-shortener/types';
 import { Subscription } from 'rxjs';
-import { ShortenRequest, UrlService } from '../modules';
+import { UrlService } from '../modules';
 
 export function useShortenUrl(service: UrlService) {
-  const [result, setResult] = useState<Url | null>(null);
+  const [result, setResult] = useState<ShortenResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const subRef = useRef<Subscription | null>(null);
 
-  const shorten = (data: ShortenRequest) => {
+  const shorten = (data: ShortenInput) => {
     setLoading(true);
     setError(null);
 
@@ -43,13 +41,13 @@ export function useShortenUrl(service: UrlService) {
   return { result, error, loading, shorten, cancel };
 }
 
-export function useUrlList(service: UrlService) {
-  const [urls, setUrls] = useState<Url[] | null>(null);
+export function useUrlList(urlService: UrlService, reloadKey = 0) {
+  const [urls, setUrls] = useState<ListAllResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<any>(null);
 
   useEffect(() => {
-    const sub = service.list().subscribe({
+    const subscription: Subscription = urlService.listAll().subscribe({
       next: (data) => {
         setUrls(data);
         setLoading(false);
@@ -60,21 +58,21 @@ export function useUrlList(service: UrlService) {
       },
     });
 
-    return () => sub.unsubscribe();
-  }, []);
+    return () => subscription.unsubscribe();
+  }, [urlService, reloadKey]); // 👈 este es el cambio clave
 
   return { urls, loading, error };
 }
 
 export function useGetUrl(shortId?: string, urlService?: UrlService) {
-  const [url, setUrl] = useState<Url | null>(null);
+  const [url, setUrl] = useState<GetUrlResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     if (!shortId || !urlService) return;
 
-    const sub: Subscription = urlService.get(shortId).subscribe({
+    const sub: Subscription = urlService.getUrl(shortId).subscribe({
       next: (data) => {
         setUrl(data);
         setLoading(false);
@@ -89,4 +87,28 @@ export function useGetUrl(shortId?: string, urlService?: UrlService) {
   }, [shortId, urlService]);
 
   return { url, loading, error };
+}
+
+export function useTopVisitedUrls(top: number, urlService: UrlService) {
+  const [urls, setUrls] = useState<Url[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<any>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    const subscription: Subscription = urlService.getTopVisitedUrls(top).subscribe({
+      next: (data) => {
+        setUrls(data);
+        setLoading(false);
+      },
+      error: (err) => {
+        setError(err);
+        setLoading(false);
+      },
+    });
+
+    return () => subscription.unsubscribe();
+  }, [top, urlService]); // 👈 ahora sí se vuelve a ejecutar cuando cambia `top`
+
+  return { urls, loading, error };
 }

@@ -50,7 +50,7 @@ export const URLShortenFormContainer: React.FC<Props> = ({ onUrlShortened }) => 
     e.preventDefault();
     if (!validateForm()) return;
     shorten({ url });
-    onUrlShortened && result && onUrlShortened(result);
+    //onUrlShortened && result && onUrlShortened(result);
     setUrl('');
     setSlug('');
   };

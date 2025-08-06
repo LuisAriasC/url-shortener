@@ -6,7 +6,7 @@ import { copyToClipboard } from '../../../utils/api';
 import { Url } from '@url-shortener/types';
 
 interface URLListItemProps {
-  shortenedUrl: Url;
+  shortenedUrl: Pick<Url, "id" | "shortId" | "originalUrl">;
 }
 
 export const URLListItem: React.FC<URLListItemProps> = ({ shortenedUrl }) => {

@@ -19,7 +19,7 @@ export class UrlEntityService {
   }
 
   create(originalUrl: string, shortId: string): Observable<Url> {
-    const newEntry = this.urlRepo.create({ originalUrl, shortId });
+    const newEntry = this.urlRepo.create({ originalUrl, shortId, visitCount: 0 });
     return from(this.urlRepo.save(newEntry)).pipe(
         catchError(error => this.handleError('create', error))
     );
@@ -34,6 +34,23 @@ export class UrlEntityService {
   findAll(): Observable<Url[]> {
     return from(this.urlRepo.find()).pipe(
         catchError(error => this.handleError('findAll', error))
+    );
+  }
+
+  update(url: Url): Observable<Url> {
+    return from(this.urlRepo.save(url)).pipe(
+        catchError(error => this.handleError('update', error))
+    );
+  }
+
+  findTopVisited(take: number): Observable<Url[]> {
+    return from(
+      this.urlRepo.find({
+        order: { visitCount: 'DESC' },
+        take,
+      }),
+    ).pipe(
+      catchError(error => this.handleError('findTopVisited', error))
     );
   }
 }

@@ -3,7 +3,7 @@ import React from 'react';
 import { URLInputField } from '../../molecules/URLInputField/URLInputField';
 import { Button } from '../../atoms/Button/Button';
 import { ErrorMessage } from '../../atoms/ErrorMessage/ErrorMessage';
-import { Url } from '@url-shortener/types';
+import { ShortenResponse, Url } from '@url-shortener/types';
 import { Copy, Check } from 'lucide-react';
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
   slugError?: string;
   generalError?: string;
   loading: boolean;
-  result?: Url | null;
+  result?: ShortenResponse | null;
   copied: boolean;
   onChangeUrl: (val: string) => void;
   onSubmit: (e: React.FormEvent) => void;

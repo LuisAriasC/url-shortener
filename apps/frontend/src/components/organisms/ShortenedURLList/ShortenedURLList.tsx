@@ -3,7 +3,7 @@ import { URLListItem } from '../../molecules/URLListItem/URLListItem';
 import { Url } from '@url-shortener/types';
 
 interface ShortenedURLListProps {
-  urls: Url[];
+  urls: Pick<Url, "id" | "shortId" | "originalUrl">[];
 }
 
 export const ShortenedURLList: React.FC<ShortenedURLListProps> = ({ urls }) => {

@@ -1,15 +1,17 @@
+// components/pages/HomePage/HomePage.tsx
 import React, { useState } from 'react';
 import { MainTemplate } from '../../templates/MainTemplate/MainTemplate';
 import { Link2 } from 'lucide-react';
 import { Url } from '@url-shortener/types';
-import { ShortenedURLListContainer } from '../../organisms/ShortenedURLList/ShortendedURLListContaines';
+import { ShortenedURLListContainer } from '../../organisms/ShortenedURLList/ShortendedURLListContainer';
 import { URLShortenFormContainer } from '../../organisms/URLShortenForm/URLShortenFormContainer';
+import { TopVisitedDashboard } from '../../organisms/TopVisitedDashboard/TopVisitedDashboard';
 
 export const HomePage: React.FC = () => {
-  const [urls, setUrls] = useState<Url[]>([]);
-  
+  const [reloadKey, setReloadKey] = useState(0);
+
   const handleUrlShortened = (result: Url) => {
-    setUrls(prev => [result, ...prev]);
+    setReloadKey((prev) => prev + 1);
   };
 
   return (
@@ -35,7 +37,12 @@ export const HomePage: React.FC = () => {
 
         {/* URL List Section */}
         <div className="bg-white rounded-2xl shadow-soft border border-secondary-100 p-6 sm:p-8">
-          <ShortenedURLListContainer />
+          <ShortenedURLListContainer reloadKey={reloadKey} />
+        </div>
+
+        {/* Dashboard Section */}
+        <div className="bg-white rounded-2xl shadow-soft border border-secondary-100 p-6 sm:p-8">
+          <TopVisitedDashboard />
         </div>
       </div>
     </MainTemplate>
