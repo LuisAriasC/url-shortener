@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  url-shortener-db:
+    image: postgres:15
+    container_name: url-shortener-db
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: url_shortener
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  url-shortener-backend:
+    container_name: url-shortener-backend
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    ports:
+      - "3000:3000"
+    env_file: apps/backend/docker-compose.env
+
+  url-shortener-frontend:
+    container_name: url-shortener-frontend
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+    ports:
+      - "4200:80"
+
+volumes:
+  postgres_data:
