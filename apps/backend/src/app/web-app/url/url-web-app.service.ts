@@ -55,12 +55,6 @@ export class UrlWebAppService {
 
   list(userId: string, page: number, pageSize: number): Observable<ListPaginatedUrlResponse> {
     return this.urlEntityService.findAllUserUrls(userId, page, pageSize).pipe(
-      map(response => {
-        console.debug('List response:', response);
-        return {
-          ...response,
-        };
-      }),
       catchError(error => throwError(() => error))
     );
   }
