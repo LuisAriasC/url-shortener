@@ -1,20 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Spinner } from '../../atoms/Spinner/Spinner';
-import { UrlService } from '../../../services/modules';
 import { useGetUrl } from '../../../services/hooks/url';
-import { useMemo } from 'react';
+import { singletonUrlService } from '../../../services/modules';
 
 export function RedirectHandler() {
-  const { shortId } = useParams<{ shortId: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const redirected = useRef(false);
   const [delayPassed, setDelayPassed] = useState(false);
 
-  const apiUrl = process.env.REACT_APP_API_URL ?? 'http://localhost:3000/api';
-  const urlService = useMemo(() => new UrlService(apiUrl), [apiUrl]);
-
-  const { url, loading, error } = useGetUrl(shortId, urlService);
+  const { url, loading, error } = useGetUrl(slug, singletonUrlService);
 
   // Timer to enforce minimum loading duration
   useEffect(() => {
@@ -26,7 +22,7 @@ export function RedirectHandler() {
   }, []);
 
   useEffect(() => {
-    if (redirected.current || !shortId || loading || !delayPassed) return;
+    if (redirected.current || !slug || loading || !delayPassed) return;
 
     if (url?.originalUrl) {
       redirected.current = true;
@@ -35,7 +31,7 @@ export function RedirectHandler() {
       redirected.current = true;
       navigate('/not-found');
     }
-  }, [shortId, url, error, loading, navigate, delayPassed]);
+  }, [slug, url, error, loading, navigate, delayPassed]);
 
   return (
     <div className="flex items-center justify-center h-screen">

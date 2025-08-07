@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
 import { Url } from '@url-shortener/types';
+import { UserEntity } from '../user/user-entity';
 
 @Entity('urls')
 export class UrlEntity implements Url {
@@ -15,7 +16,11 @@ export class UrlEntity implements Url {
   @Column({ name: 'visit_count', type: 'int' })
   visitCount: number;
 
+  @ManyToOne(() => UserEntity, (user) => user.urls, { eager: true, onDelete: 'CASCADE' })
+  createdBy: UserEntity;
+  
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
 }
 

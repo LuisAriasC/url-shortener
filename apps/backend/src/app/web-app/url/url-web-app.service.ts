@@ -13,7 +13,7 @@ export class UrlWebAppService {
     return throwError(() => new Error(`${location}: ${inspect(error, false, 5 , true)}`,))
   }
 
-  createShortUrl(originalUrl: string): Observable<Url> {
+  createShortUrl(userId: string, originalUrl: string): Observable<Url> {
     if (!isValidUrl(originalUrl)) {
       return this.handleError('createShortUrl', 'Invalid URL provided');
     }
@@ -25,7 +25,7 @@ export class UrlWebAppService {
         if (existing) {
           return throwError(() => new Error('Slug already exists'));
         }
-        return this.urlEntityService.create(originalUrl, shortId);
+        return this.urlEntityService.create(userId, originalUrl, shortId);
       }),
       catchError(error => this.handleError('createShortUrl', error))
     );
@@ -53,13 +53,30 @@ export class UrlWebAppService {
     );
   }
 
-  findTopVisited(limit: number): Observable<Url[]> {
-    return this.urlEntityService.findTopVisited(limit).pipe(
-      map(urls => {
-        console.log('Top visited URLs:', urls);
-        return urls;
-      }),
+  findAllUserUrls(userId: string): Observable<Url[]> {
+    return this.urlEntityService.findAllUserUrls(userId).pipe(
+      catchError(error => this.handleError('findAll', error))
+    );
+  }
+
+  findTopVisited(userId: string, limit: number): Observable<Url[]> {
+    return this.urlEntityService.findTopVisited(userId, limit).pipe(
       catchError(error => this.handleError('findTopVisited', error))
+    );
+  }
+
+  updateSlug(userId: string, urlId: string, newSlug: string): Observable<Url | null> {
+    if(newSlug.length !== 8) {
+      return this.handleError('updateSlug', 'Slug must be exactly 8 characters long');
+    }
+    return this.urlEntityService.updateSlug(userId, urlId, newSlug).pipe(
+      map(url => {
+        if (!url) {
+          throw new Error('URL not found or slug already in use');
+        }
+        return url;
+      }),
+      catchError(error => throwError(() => error))
     );
   }
 }

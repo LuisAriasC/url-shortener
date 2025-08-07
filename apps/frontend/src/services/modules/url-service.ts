@@ -9,7 +9,7 @@ export class UrlService implements UrlApi {
     this.apiUrl = apiUrl;
   }
   shorten(payload: ShortenInput): Observable<ShortenResponse> {
-    return fromAxios(axiosInstance.post<ShortenResponse>(`${this.apiUrl}/shorten`, payload).then(res => res.data)).pipe(
+    return fromAxios(axiosInstance.post<ShortenResponse>(`${this.apiUrl}/urls/shorten`, payload).then(res => res.data)).pipe(
         catchError(err => {
             console.error('Error shortening URL:', err);
             throw new Error(err.response?.data?.error || 'Failed to shorten URL');
@@ -18,7 +18,7 @@ export class UrlService implements UrlApi {
   }
 
   listAll(): Observable<ListAllResponse> {
-    return fromAxios(axiosInstance.get<ListAllResponse>(`${this.apiUrl}/list-all`).then(res => res.data));
+    return fromAxios(axiosInstance.get<ListAllResponse>(`${this.apiUrl}/urls/list-all`).then(res => res.data));
   }
 
   getUrl(slug: string): Observable<GetUrlResponse> {
@@ -27,5 +27,9 @@ export class UrlService implements UrlApi {
 
   getTopVisitedUrls(top: number): Observable<Url[]> {
     return fromAxios(axiosInstance.get<Url[]>(`${this.apiUrl}/urls/top-visited?limit=${top}`).then(res => res.data));
+  }
+
+  updateSlug(urlId: string, newSlug: string): Observable<Url> {
+    return fromAxios(axiosInstance.patch<Url>(`${this.apiUrl}/urls/update-slug`, { id: urlId, newSlug }).then((res) => res.data));
   }
 };

@@ -3,7 +3,7 @@ import React from 'react';
 import { URLInputField } from '../../molecules/URLInputField/URLInputField';
 import { Button } from '../../atoms/Button/Button';
 import { ErrorMessage } from '../../atoms/ErrorMessage/ErrorMessage';
-import { ShortenResponse, Url } from '@url-shortener/types';
+import { ShortenResponse } from '@url-shortener/types';
 import { Copy, Check } from 'lucide-react';
 
 interface Props {

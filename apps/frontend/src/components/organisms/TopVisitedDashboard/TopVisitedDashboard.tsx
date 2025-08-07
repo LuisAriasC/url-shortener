@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
-import { UrlService } from '../../../services/modules';
+import { singletonUrlService } from '../../../services/modules';
 import { useTopVisitedUrls } from '../../../services/hooks/url';
 import { Spinner } from '../../atoms/Spinner/Spinner';
 import { Select } from '../../atoms/Select/Select';
 
-const apiUrl = process.env.REACT_APP_API_URL ?? 'http://localhost:3000/api';
-const urlService = new UrlService(apiUrl);
 
 export const TopVisitedDashboard: React.FC = () => {
   const [top, setTop] = useState<number>(5);
-  const { urls, loading, error } = useTopVisitedUrls(top, urlService);
+  const { urls, loading, error } = useTopVisitedUrls(top, singletonUrlService); // Esto se queda en loop siendo llamado
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setTop(Number(event.target.value));

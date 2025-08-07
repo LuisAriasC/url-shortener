@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { GetUrlResponse, ListAllResponse, ShortenInput, ShortenResponse, Url } from '@url-shortener/types';
 import { Subscription } from 'rxjs';
 import { UrlService } from '../modules';
@@ -41,12 +41,13 @@ export function useShortenUrl(service: UrlService) {
   return { result, error, loading, shorten, cancel };
 }
 
-export function useUrlList(urlService: UrlService, reloadKey = 0) {
+export function useUrlList(urlService: UrlService) {
   const [urls, setUrls] = useState<ListAllResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>(null);
 
-  useEffect(() => {
+  const fetchData = useCallback(() => {
+    setLoading(true);
     const subscription: Subscription = urlService.listAll().subscribe({
       next: (data) => {
         setUrls(data);
@@ -59,9 +60,14 @@ export function useUrlList(urlService: UrlService, reloadKey = 0) {
     });
 
     return () => subscription.unsubscribe();
-  }, [urlService, reloadKey]); // 👈 este es el cambio clave
+  }, [urlService]);
 
-  return { urls, loading, error };
+  useEffect(() => {
+    const unsubscribe = fetchData();
+    return () => unsubscribe();
+  }, [fetchData]);
+
+  return { urls, loading, error, refetch: fetchData, setUrls };
 }
 
 export function useGetUrl(shortId?: string, urlService?: UrlService) {

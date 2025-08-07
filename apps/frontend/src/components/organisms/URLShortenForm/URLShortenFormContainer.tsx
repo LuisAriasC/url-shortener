@@ -1,17 +1,13 @@
 // containers/URLShortenFormContainer.tsx
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { URLShortenForm } from './URLShortenForm';
 import { isValidUrl, isValidSlug } from '../../../utils/validation';
 import { copyToClipboard } from '../../../utils/api';
 import { useShortenUrl } from '../../../services/hooks/url';
-import { Url } from '@url-shortener/types';
-import { UrlService } from '../../../services/modules';
+import { singletonUrlService } from '../../../services/modules';
 
-interface Props {
-  onUrlShortened: (result: Url) => void;
-}
 
-export const URLShortenFormContainer: React.FC<Props> = ({ onUrlShortened }) => {
+export const URLShortenFormContainer: React.FC = () => {
   const [url, setUrl] = useState('');
   const [slug, setSlug] = useState('');
   const [urlError, setUrlError] = useState('');
@@ -20,9 +16,7 @@ export const URLShortenFormContainer: React.FC<Props> = ({ onUrlShortened }) => 
   const [copied, setCopied] = useState(false);
 
   const appUrl = process.env.REACT_APP_APP_URL;
-  const apiUrl = process.env.REACT_APP_API_URL ?? 'http://localhost:3000/api';;
-  const urlService: UrlService = useMemo(() => new UrlService(apiUrl), [apiUrl]);
-  const { result, error, loading, shorten } = useShortenUrl(urlService);
+  const { result, error, loading, shorten } = useShortenUrl(singletonUrlService);
 
   const validateForm = (): boolean => {
     let isValid = true;
@@ -50,7 +44,6 @@ export const URLShortenFormContainer: React.FC<Props> = ({ onUrlShortened }) => 
     e.preventDefault();
     if (!validateForm()) return;
     shorten({ url });
-    //onUrlShortened && result && onUrlShortened(result);
     setUrl('');
     setSlug('');
   };

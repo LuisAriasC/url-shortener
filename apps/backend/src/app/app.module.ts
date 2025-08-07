@@ -4,7 +4,8 @@ import { AppService } from './app.service';
 import { PostgresModule } from '@url-shortener/types';
 import { WebAppModule } from './web-app/web-app.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, Reflector } from '@nestjs/core';
+import { JwtAuthGuard } from './web-app/auth/jwt.guard';
 
 @Module({
   imports: [
@@ -26,6 +27,11 @@ import { APP_GUARD } from '@nestjs/core';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useFactory: (reflector: Reflector) => new JwtAuthGuard(reflector),
+      inject: [Reflector],
     }
   ],
 })

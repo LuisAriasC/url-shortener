@@ -1,10 +1,10 @@
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { UrlEntity } from './url-entity';
 import { Url} from '@url-shortener/types';
-import { Observable, catchError, from, throwError } from 'rxjs';
+import { Observable, catchError, from, map, switchMap, throwError } from 'rxjs';
 import { inspect } from 'util';
 
 @Injectable()
@@ -18,8 +18,8 @@ export class UrlEntityService {
     return throwError(() => new Error(`${location}: ${inspect(error, false, 5 , true)}`,))
   }
 
-  create(originalUrl: string, shortId: string): Observable<Url> {
-    const newEntry = this.urlRepo.create({ originalUrl, shortId, visitCount: 0 });
+  create(userId: string, originalUrl: string, shortId: string): Observable<Url> {
+    const newEntry = this.urlRepo.create({ originalUrl, shortId, visitCount: 0, createdBy: { id: userId } });
     return from(this.urlRepo.save(newEntry)).pipe(
         catchError(error => this.handleError('create', error))
     );
@@ -43,14 +43,52 @@ export class UrlEntityService {
     );
   }
 
-  findTopVisited(take: number): Observable<Url[]> {
+  findAllUserUrls(userId: string): Observable<Url[]> {
+    return from(this.urlRepo.find({
+      where: { 
+        createdBy: { id: userId },
+      },
+      order: { createdAt: 'DESC' },
+    })).pipe(
+        catchError(error => this.handleError('findAll', error))
+    );
+  }
+
+  findTopVisited(userId: string, take: number): Observable<Url[]> {
+    console.debug('Finding top visited URLs for user:', userId, 'with limit:', take);
     return from(
       this.urlRepo.find({
+        where: { 
+          createdBy: { id: userId },
+          visitCount: MoreThan(0)
+        },
         order: { visitCount: 'DESC' },
         take,
       }),
     ).pipe(
       catchError(error => this.handleError('findTopVisited', error))
+    );
+  }
+
+  updateSlug(userId: string, urlId: string, newSlug: string): Observable<Url | null> {
+    return from(this.urlRepo.findOneBy({ shortId: newSlug })).pipe(
+      switchMap(existing => {
+        if (existing) {
+          throw new Error('Slug already in use');
+        }
+        return from(this.urlRepo.findOne({ where: { id: urlId, createdBy: { id: userId } } })).pipe(
+          switchMap(url => {
+            if (!url) {
+              throw new Error('URL not found or not owned by user');
+            }
+            url.shortId = newSlug;
+            return from(this.urlRepo.save(url)).pipe(
+              map(() => url),
+              catchError(error => this.handleError('updateSlug', error))
+            );
+          })
+        );
+      }),
     );
   }
 }

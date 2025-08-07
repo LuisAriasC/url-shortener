@@ -5,7 +5,8 @@ export interface ShortenInput {
     url: string;
 }
 
-export interface ShortenResponse extends Pick<Url, 'shortId' | 'originalUrl'> {
+export interface ShortenResponse extends Pick<Url,'id' | 'shortId' | 'originalUrl'> {
+    id: string;
     shortId: string;
     originalUrl: string;
 }
