@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { GetUrlResponse, ListAllResponse, ShortenInput, ShortenResponse, Url } from '@url-shortener/types';
+import { useState, useEffect, useRef } from 'react';
+import { GetUrlResponse, ShortenInput, ShortenResponse, Url } from '@url-shortener/types';
 import { Subscription } from 'rxjs';
 import { UrlService } from '../modules';
 
@@ -39,35 +39,6 @@ export function useShortenUrl(service: UrlService) {
   }, []);
 
   return { result, error, loading, shorten, cancel };
-}
-
-export function useUrlList(urlService: UrlService) {
-  const [urls, setUrls] = useState<ListAllResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
-
-  const fetchData = useCallback(() => {
-    setLoading(true);
-    const subscription: Subscription = urlService.listAll().subscribe({
-      next: (data) => {
-        setUrls(data);
-        setLoading(false);
-      },
-      error: (err) => {
-        setError(err);
-        setLoading(false);
-      },
-    });
-
-    return () => subscription.unsubscribe();
-  }, [urlService]);
-
-  useEffect(() => {
-    const unsubscribe = fetchData();
-    return () => unsubscribe();
-  }, [fetchData]);
-
-  return { urls, loading, error, refetch: fetchData, setUrls };
 }
 
 export function useGetUrl(shortId?: string, urlService?: UrlService) {

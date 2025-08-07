@@ -1,5 +1,5 @@
 // libs/api/modules/url.ts
-import { GetUrlResponse, ListAllResponse, ShortenInput, ShortenResponse, Url, UrlApi } from '@url-shortener/types';
+import { GetUrlResponse, ListPaginatedUrlInput, ListPaginatedUrlResponse, ShortenInput, ShortenResponse, Url, UrlApi } from '@url-shortener/types';
 import { fromAxios, axiosInstance } from '../api';
 import { catchError, Observable } from 'rxjs';
 
@@ -17,12 +17,14 @@ export class UrlService implements UrlApi {
     );
   }
 
-  listAll(): Observable<ListAllResponse> {
-    return fromAxios(axiosInstance.get<ListAllResponse>(`${this.apiUrl}/urls/list-all`).then(res => res.data));
+  list(input: ListPaginatedUrlInput): Observable<ListPaginatedUrlResponse> {
+    return fromAxios(axiosInstance.get<ListPaginatedUrlResponse>(`${this.apiUrl}/urls/list`, {
+      params: input,
+    }).then(res => res.data));
   }
 
   getUrl(slug: string): Observable<GetUrlResponse> {
-    return fromAxios(axiosInstance.get<GetUrlResponse>(`${this.apiUrl}/${slug}`).then(res => res.data));
+    return fromAxios(axiosInstance.get<GetUrlResponse>(`${this.apiUrl}/urls/${slug}`).then(res => res.data));
   }
 
   getTopVisitedUrls(top: number): Observable<Url[]> {

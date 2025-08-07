@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThan, Repository } from 'typeorm';
 import { UrlEntity } from './url-entity';
-import { Url} from '@url-shortener/types';
+import { ListPaginatedUrlResponse, Url} from '@url-shortener/types';
 import { Observable, catchError, from, map, switchMap, throwError } from 'rxjs';
 import { inspect } from 'util';
 
@@ -43,14 +43,25 @@ export class UrlEntityService {
     );
   }
 
-  findAllUserUrls(userId: string): Observable<Url[]> {
-    return from(this.urlRepo.find({
-      where: { 
-        createdBy: { id: userId },
-      },
-      order: { createdAt: 'DESC' },
-    })).pipe(
-        catchError(error => this.handleError('findAll', error))
+  findAllUserUrls(userId: string, page: number, pageSize: number): Observable<ListPaginatedUrlResponse> {
+    console.debug('Finding all URLs for user:', userId, 'on page:', page, 'with page size:', pageSize);
+    return from(
+      this.urlRepo.findAndCount({
+        where: { createdBy: { id: userId } },
+        order: { createdAt: 'DESC' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      })
+    ).pipe(
+      map(([urls, total]) => ({
+        urls: urls.map((u) => ({
+          id: u.id,
+          originalUrl: u.originalUrl,
+          shortId: u.shortId,
+        })),
+        total,
+      })),
+      catchError(error => this.handleError('findAllUserUrls', error))
     );
   }
 

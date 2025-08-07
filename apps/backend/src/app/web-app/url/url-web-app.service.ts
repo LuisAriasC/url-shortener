@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UrlEntityService } from '../../entities/url/url-entity.service';
-import { Url, generateShortId} from '@url-shortener/types';
+import { ListPaginatedUrlResponse, Url, generateShortId} from '@url-shortener/types';
 import { Observable, throwError, of, switchMap, catchError, map } from 'rxjs';
 import { isValidUrl } from '@url-shortener/types';
 import { inspect } from 'util';
@@ -53,13 +53,19 @@ export class UrlWebAppService {
     );
   }
 
-  findAllUserUrls(userId: string): Observable<Url[]> {
-    return this.urlEntityService.findAllUserUrls(userId).pipe(
-      catchError(error => this.handleError('findAll', error))
+  list(userId: string, page: number, pageSize: number): Observable<ListPaginatedUrlResponse> {
+    return this.urlEntityService.findAllUserUrls(userId, page, pageSize).pipe(
+      map(response => {
+        console.debug('List response:', response);
+        return {
+          ...response,
+        };
+      }),
+      catchError(error => throwError(() => error))
     );
   }
 
-  findTopVisited(userId: string, limit: number): Observable<Url[]> {
+  getTopVisited(userId: string, limit: number): Observable<Url[]> {
     return this.urlEntityService.findTopVisited(userId, limit).pipe(
       catchError(error => this.handleError('findTopVisited', error))
     );

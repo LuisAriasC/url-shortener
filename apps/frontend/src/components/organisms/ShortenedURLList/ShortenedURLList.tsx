@@ -5,9 +5,10 @@ import { Url } from '@url-shortener/types';
 
 interface ShortenedURLListProps {
   urls: Pick<Url, "id" | "shortId" | "originalUrl">[];
+  total: number;
 }
 
-export const ShortenedURLList: React.FC<ShortenedURLListProps> = ({ urls }) => {
+export const ShortenedURLList: React.FC<ShortenedURLListProps> = ({ urls, total }) => {
   if (urls.length === 0) {
     return (
       <div className="text-center py-12">
@@ -22,7 +23,7 @@ export const ShortenedURLList: React.FC<ShortenedURLListProps> = ({ urls }) => {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold text-secondary-900">
-        Your Shortened URLs ({urls.length})
+        Your Shortened URLs ({ total })
       </h2>
       <div className="space-y-3">
         {urls.map((url) => (

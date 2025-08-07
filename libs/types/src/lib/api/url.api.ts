@@ -11,16 +11,22 @@ export interface ShortenResponse extends Pick<Url,'id' | 'shortId' | 'originalUr
     originalUrl: string;
 }
 
-export interface ListAllResponse {
-    urls: Pick<Url, 'id' | 'shortId' | 'originalUrl'>[];
-}
-
 export interface GetUrlResponse extends Pick<Url, 'originalUrl'> {
     originalUrl: string;
 }
 
+export interface ListPaginatedUrlInput {
+    page: number;
+    pageSize: number;
+}
+
+export interface ListPaginatedUrlResponse {
+    urls: Pick<Url, 'id' | 'shortId' | 'originalUrl'>[];
+    total: number;
+}
+
 export interface UrlApi {
     shorten(input: ShortenInput): Observable<ShortenResponse>;
-    listAll(): Observable<ListAllResponse>;
+    list(input: ListPaginatedUrlInput): Observable<ListPaginatedUrlResponse>;
     getUrl(shortId: string): Observable<GetUrlResponse>;
 }

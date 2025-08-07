@@ -1,26 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { MainTemplate } from '../../templates/MainTemplate/MainTemplate';
 import { Link2 } from 'lucide-react';
-import { ListAllResponse } from '@url-shortener/types';
 import { ShortenedURLListContainer } from '../../organisms/ShortenedURLList/ShortendedURLListContainer';
 import { URLShortenFormContainer } from '../../organisms/URLShortenForm/URLShortenFormContainer';
 import { TopVisitedDashboard } from '../../organisms/TopVisitedDashboard/TopVisitedDashboard';
-import { singletonUrlService } from '../../../services/modules';
 import { useAuth } from '../../../contexts/AuthContext'; // 👈 importamos el contexto
 
 export const HomePage: React.FC = () => {
-  const [urls, setUrls] = useState<ListAllResponse | null>(null);
   const { logout } = useAuth(); // 👈 usamos logout del contexto
-
-  // Al montar, carga la lista inicial
-  useEffect(() => {
-    const subscription = singletonUrlService.listAll().subscribe({
-      next: (res) => setUrls(res),
-      error: (err) => console.error('Failed to load URLs', err),
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   return (
     <MainTemplate>
@@ -52,7 +39,7 @@ export const HomePage: React.FC = () => {
 
         {/* Updated list */}
         <div className="bg-white rounded-2xl shadow-soft border border-secondary-100 p-6 sm:p-8">
-          <ShortenedURLListContainer urls={urls?.urls || []} />
+          <ShortenedURLListContainer />
         </div>
 
         {/* Dashboard */}
